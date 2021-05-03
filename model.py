@@ -1,39 +1,15 @@
 from pytocl.driver import Driver
 from pytocl.car import State, Command
-
 from keras.layers import Dense, concatenate, Input
 from keras.models import Sequential, Model
 import tensorflow as tf
-
-from model import Modelo
-
 import numpy as np
 
 
-class MyDriver(Driver):
 
-    def drive(self, carstate: State) -> Command:
-        command = Command()
+class Modelo():
 
-        command.accelerator = 1
-        command.gear = 1
-        command.brake = 0
-
-        raycasts = np.array(carstate.focused_distances_from_edge)
-
-        if np.average(raycasts) != -1:
-            print(raycasts)
-
-        if self.data_logger:
-            self.data_logger.log(carstate, command)
-
-        Modelo.create_model(self)
-
-        return command
-
-'''
     def create_model(self):
-
         #Capa de entrada
         layer1 = Input(shape=(6,))
         #Capas ocultas
@@ -48,5 +24,4 @@ class MyDriver(Driver):
 
         model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
 
-        #tf.keras.utils.plot_model(model, to_file="model_with_shape_info.png", show_shapes=True, show_layer_names=True)
-'''
+        tf.keras.utils.plot_model(model, to_file="tmp/model_shape_info.png", show_shapes=True, show_layer_names=True)

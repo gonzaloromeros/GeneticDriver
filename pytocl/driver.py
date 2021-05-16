@@ -20,6 +20,9 @@ class Driver:
     """
 
     def __init__(self, logdata=True):
+        self.carState = None
+        # TODO: Comentar o descomentar esto
+        '''
         self.steering_ctrl = CompositeController(
             ProportionalController(0.4),
             IntegrationController(0.2, integral_limit=1.5),
@@ -28,6 +31,7 @@ class Driver:
         self.acceleration_ctrl = CompositeController(
             ProportionalController(3.7),
         )
+        '''
         self.data_logger = DataLogWriter() if logdata else None
 
     @property
@@ -51,7 +55,7 @@ class Driver:
 
 
 
-
+    # TODO: Ver que hacer con esto
     #Estos 2 métodos siguientes son parte del Wrapper
     #Método para que el coche acelere de manera autónoma controlando la velocidad
     def accelerate(self, carstate, target_speed, command):

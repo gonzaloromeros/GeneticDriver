@@ -128,8 +128,10 @@ class Client:
                 self.stop()
 
             elif MSG_RESTART in buffer:
+                #Reiniciar carrera sale del bucle y vuelve a run.py
                 _logger.info('Server requested restart of driver.')
                 self.driver.on_restart()
+                Client.stop(self)
 
             else:
                 sensor_dict = self.serializer.decode(buffer)

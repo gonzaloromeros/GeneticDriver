@@ -7,21 +7,24 @@ import numpy as np
 
 class MyDriver(Driver):
 
+    modelo = Modelo()
+
     def drive(self, carstate: State) -> Command:
         self.carState = carstate
         command = Command()
 
-        command.accelerator = 1
-        command.gear = 1
-        command.brake = 0
-        # command.meta = 1
-
         raycasts = np.array(carstate.focused_distances_from_edge)
 
         if np.average(raycasts) != -1:
-            Modelo.crear_modelo(self, raycasts, carstate.speed_x)
+            self.prediction = self.modelo.inferir_modelo(raycasts, carstate.speed_x)
+            print(self.prediction)
 
+        command.steering = self.prediction[0, 0]
+        command.accelerator = self.prediction[0, 1]
+        command.brake = 0
 
+        command.gear = 1
+        # command.meta = 1
 
         return command
 

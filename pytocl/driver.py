@@ -6,6 +6,7 @@ from pytocl.analysis import DataLogWriter
 from pytocl.car import State, Command, MPS_PER_KMH
 from pytocl.controller import CompositeController, ProportionalController, \
     IntegrationController, DerivativeController
+import numpy as np
 
 _logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ class Driver:
 
     def __init__(self, logdata=True):
         self.carState = None
+
+        self.prediction = np.zeros((1, 3))
         # TODO: Comentar o descomentar esto
         '''
         self.steering_ctrl = CompositeController(

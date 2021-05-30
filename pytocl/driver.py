@@ -7,6 +7,7 @@ from pytocl.car import State, Command, MPS_PER_KMH
 from pytocl.controller import CompositeController, ProportionalController, \
     IntegrationController, DerivativeController
 import numpy as np
+from modelo import Modelo
 
 _logger = logging.getLogger(__name__)
 
@@ -20,21 +21,11 @@ class Driver:
     command within 10ms wall time.
     """
 
-    def __init__(self, logdata=True):
-        self.carState = None
-
+    def __init__(self, logdata=True, generation=-1, n=-1):
+        self.generation = generation
+        self.n = n
         self.prediction = np.zeros((1, 3))
-        # TODO: Comentar o descomentar esto
-        '''
-        self.steering_ctrl = CompositeController(
-            ProportionalController(0.4),
-            IntegrationController(0.2, integral_limit=1.5),
-            DerivativeController(2)
-        )
-        self.acceleration_ctrl = CompositeController(
-            ProportionalController(3.7),
-        )
-        '''
+        self.modelo = Modelo(generation, n)
         self.data_logger = DataLogWriter() if logdata else None
 
     @property
@@ -55,46 +46,3 @@ class Driver:
         if self.data_logger:
             self.data_logger.close()
             self.data_logger = None
-
-
-
-    # TODO: Ver que hacer con esto
-    #Estos 2 métodos siguientes son parte del Wrapper
-    #Método para que el coche acelere de manera autónoma controlando la velocidad
-    def accelerate(self, carstate, target_speed, command):
-        # compensate engine deceleration, but invisible to controller to
-        # prevent braking:
-        speed_error = 1.0025 * target_speed * MPS_PER_KMH - carstate.speed_x
-        acceleration = self.acceleration_ctrl.control(
-            speed_error,
-            carstate.current_lap_time
-        )
-
-        # stabilize use of gas and brake:
-        acceleration = math.pow(acceleration, 3)
-
-        if acceleration > 0:
-            if abs(carstate.distance_from_center) >= 1:
-                # off track, reduced grip:
-                acceleration = min(0.4, acceleration)
-
-            command.accelerator = min(acceleration, 1)
-
-            if carstate.rpm > 8000:
-                command.gear = carstate.gear + 1
-
-        # else:
-        #     command.brake = min(-acceleration, 1)
-
-        if carstate.rpm < 2500:
-            command.gear = carstate.gear - 1
-
-        if not command.gear:
-            command.gear = carstate.gear or 1
-    #Método para que el coche gire solo hacia el centro de la pista
-    def steer(self, carstate, target_track_pos, command):
-        steering_error = target_track_pos - carstate.distance_from_center
-        command.steering = self.steering_ctrl.control(
-            steering_error,
-            carstate.current_lap_time
-        )

@@ -43,7 +43,7 @@ def sus(fitness, index_orden):
     # intervalo entre punteros
     intervalo = total_fitness / n_punteros
     # posición inicial donde empezará el primer puntero
-    puntero = random.randint(0, intervalo)
+    puntero = np.random.uniform(0., intervalo)
 
     for i in range(n_punteros):
         sig = False

@@ -3,6 +3,7 @@ from pytocl.main import main
 from my_driver import MyDriver
 import numpy as np
 from os import remove
+import random
 import genetic
 
 

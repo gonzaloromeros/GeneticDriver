@@ -54,3 +54,15 @@ def sus(fitness, index_orden):
                 j += 1
                 sum_fitness += fitness[index_orden[j]]
     return padres
+
+
+def crossover_multipunto():
+    ...
+
+
+def crossover_uniforme():
+    ...
+
+
+def mutacion(driver):
+    ...

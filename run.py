@@ -25,7 +25,7 @@ if __name__ == '__main__':
             # Selección nueva generación --> 80 individuos
             fitness = np.load("fitness/fitness.npy")
 
-            index_orden = np.zeros_like(fitness)
+            index_orden = np.zeros_like(fitness, int)
             indexes = np.argsort(fitness)
             for i in range(len(indexes)):
                 index_orden[i] = indexes[(len(indexes) - 1) - i]

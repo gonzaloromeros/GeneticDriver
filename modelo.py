@@ -2,7 +2,6 @@ from keras.layers import Dense, concatenate, Input
 from keras.models import Sequential, Model
 import tensorflow as tf
 import numpy as np
-import os
 
 
 class Modelo:
@@ -41,7 +40,8 @@ class Modelo:
 
         result = self.modelo.predict(x.reshape(1, 6), verbose=0)
 
-        # tf.keras.utils.plot_model(self.modelo, to_file="tmp/model_shape_info.png", show_dtype=True, show_shapes=True, show_layer_names=True)
+        # Saca una imagen de la estructura del modelo
+        # tf.keras.utils.plot_model(self.modelo, to_file="model_shape_info.png", show_dtype=True, show_shapes=True, show_layer_names=True)
 
         return result
 

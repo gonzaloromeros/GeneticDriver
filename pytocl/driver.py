@@ -24,6 +24,10 @@ class Driver:
     def __init__(self, logdata=True, generation=-1, n=-1):
         self.generation = generation
         self.n = n
+        self.lap = 1
+        self.speed_av = np.zeros(2)
+        self.raycast_av = np.zeros(2)
+        self.distance_raced = 0.0
         self.prediction = np.zeros((1, 3))
         self.modelo = Modelo(generation, n)
         self.data_logger = DataLogWriter() if logdata else None

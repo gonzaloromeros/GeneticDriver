@@ -46,7 +46,7 @@ class Modelo:
         return result
 
     def guardar_pesos(self, n):
-        # Guardar pesos Driver actual
+        # Guardar pesos Driver actual en archivo .npy
         weights = self.modelo.get_weights()
         chain = weights[0]
         for i in weights[1:]:

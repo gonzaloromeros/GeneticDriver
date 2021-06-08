@@ -77,10 +77,9 @@ if __name__ == '__main__':
             genetic.crossover_multipunto(emparejamientos, padres, elite+nuevos)
 
             # Mutaciones
-            '''
             for i in range(0, poblacion):
                 if 5 > random.randint(0, 100):
-                    genetic.mutacion(i)'''
+                    genetic.mutacion(i)
 
     else:
         # Probar con los 4 Drivers que haya conseguido más fitness en el entrenamiento

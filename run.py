@@ -14,7 +14,7 @@ if __name__ == '__main__':
     train = True
     if train:
         # Aplica el Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
-        generaciones = 51  # Generaciones +1
+        generaciones = 501  # Generaciones +1
         poblacion = 80  # Población de cada generación
         for g in range(1, generaciones):
             print(f'--Generation {g}--')
@@ -77,9 +77,10 @@ if __name__ == '__main__':
             genetic.crossover_multipunto(emparejamientos, padres, elite+nuevos)
 
             # Mutaciones
+            '''
             for i in range(0, poblacion):
                 if 5 > random.randint(0, 100):
-                    genetic.mutacion(i)
+                    genetic.mutacion(i)'''
 
     else:
         # Probar con los 4 Drivers que haya conseguido más fitness en el entrenamiento

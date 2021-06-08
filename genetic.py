@@ -6,22 +6,20 @@ import tensorflow as tf
 
 def fitness_func(d, v, l, r):
     # d = distance raced
-    print(f'd: {d}')
     # v = average speed
-    print(f'v: {v}')
     # l = laps
-    print(f'l: {l}')
     # R = average raycast measures
-    print(f'r: {r/(1+r)}')
+    print(f'(d: {"{:.2f}".format(d)} | v: {"{:.2f}".format(v)} | l: {"{:.2f}".format(l)} | r: {"{:.2f}".format(r/(1+r))})')
 
-    fit = ((d ** 2) * v * l * r) / (1 + r)
+    fit = (((d + v) * l * r) / (1 + r))
+
     return fit
 
 
 def guardar_fitness(fit):
     # Guarda el "fitness score" cada Driver en un archivo .npy
     if os.path.isfile("fitness/fitness.npy"):
-        fitness = np.load("fitness/fitness.npy")
+        fitness = np.load("fitness/fitness.npy", allow_pickle=True)
         fitness = np.append(fitness, fit)
     else:
         fitness = np.array([fit])
@@ -39,17 +37,18 @@ def sus(fitness, index_orden):
     # número de punteros y por tanto de padres que se elegirán
     n_punteros = 34
     # array donde se guardará la posición que ocupan los padres dentro del array de fitness
-    padres = np.zeros(n_punteros)
+    padres = np.zeros(n_punteros, dtype=int)
     # intervalo entre punteros
     intervalo = total_fitness / n_punteros
     # posición inicial donde empezará el primer puntero
-    puntero = np.random.uniform(0., intervalo)
+    puntero = np.random.uniform(0., intervalo-0.01)
 
     for i in range(n_punteros):
         sig = False
         while not sig:
             if puntero < sum_fitness:
                 padres[i] = index_orden[j]
+                puntero += intervalo
                 sig = True
             else:
                 j += 1
@@ -58,7 +57,7 @@ def sus(fitness, index_orden):
 
 
 def copiar_pesos(driver, carpeta):
-    peso = np.load(f"weights/pesos{driver}.npy")
+    peso = np.load(f"weights/pesos{driver}.npy", allow_pickle=True)
     np.save(f"tmp/{carpeta}/pesos{driver}.npy", peso)
 
 
@@ -66,8 +65,8 @@ def crossover_multipunto(emparejamientos, padres, driver):
     # Genera toda la descendencia de los emparejamientos dados
     for idx, val in enumerate(emparejamientos):
         # Carga los pesos de los padres
-        padre1 = np.load(f"tmp/parents/pesos{padres[idx]}.npy")
-        padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy")
+        padre1 = np.load(f"tmp/parents/pesos{padres[idx]}.npy", allow_pickle=True)
+        padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy", allow_pickle=True)
         # Selecciona un segmento a intercambiar
         x = random.randint(0, len(padre1)-1)
         y = random.randint(x, len(padre1))
@@ -92,15 +91,15 @@ def crossover_multipunto(emparejamientos, padres, driver):
 def mutacion(driver):
     # Hace que los pesos de un driver cambien al menos una vez
     probabilidad_mutacion = 100
-    prob_sig_mutacion = 0.6
+    prob_sig_mutacion = 0.8
     mutando = True
     # Carga pesos a mutar
-    pesos = np.load(f"weights/pesos{driver}.npy")
+    pesos = np.load(f"weights/pesos{driver}.npy", allow_pickle=True)
     # Bucle de mutaciones con cada vez menor probabilidad de continuar
     while mutando:
-        if random.randint(1, 101) <= probabilidad_mutacion:
+        if random.randint(0, 100) <= probabilidad_mutacion:
             # Escoge un gen aleatorio
-            gen = random.randint(0, len(pesos))
+            gen = random.randint(0, len(pesos)-1)
             # Genera mutación
             mut_init = tf.keras.initializers.GlorotUniform()
             mut = mut_init(shape=(1,))

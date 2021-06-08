@@ -2,6 +2,7 @@ from keras.layers import Dense, concatenate, Input
 from keras.models import Sequential, Model
 import tensorflow as tf
 import numpy as np
+import os
 
 
 class Modelo:
@@ -24,8 +25,10 @@ class Modelo:
 
         if generation == 1:
             self.modelo.set_weights(self.inicializar_pesos())
-        else:
+        elif generation != -1:
             self.modelo.set_weights(self.cargar_pesos(n))
+        else:
+            self.modelo.set_weights(self.cargar_elite(n))
 
     def inferir_modelo(self, raycasts, speed):
         # Preprocesamiento
@@ -69,7 +72,22 @@ class Modelo:
     @staticmethod
     def cargar_pesos(n):
         # Carga archivo .npy
-        chain = np.load(f"weights/pesos{n}.npy")
+        chain = np.load(f"weights/pesos{n}.npy", allow_pickle=True)
+        w1 = chain[0:54].reshape((6, 9))
+        b1 = chain[54:63].reshape((9,))
+        w2 = chain[63:117].reshape((9, 6))
+        b2 = chain[117:123].reshape((6,))
+        w3_1 = chain[123:129].reshape((6, 1))
+        b3_1 = chain[129].reshape((1,))
+        w3_2 = chain[130:136].reshape((6, 1))
+        b3_2 = chain[136].reshape((1,))
+        return [w1, b1, w2, b2, w3_1, b3_1, w3_2, b3_2]
+
+    @staticmethod
+    def cargar_elite(n):
+        # Carga mejores corredores de la carpeta élite .npy
+        listado = os.listdir("tmp/elite")
+        chain = np.load(f"tmp/elite/{listado[n]}", allow_pickle=True)
         w1 = chain[0:54].reshape((6, 9))
         b1 = chain[54:63].reshape((9,))
         w2 = chain[63:117].reshape((9, 6))

@@ -23,3 +23,7 @@ This is a copy of the reimplementation in Python 3 by @moltob of the original SC
 ## `Command`
 
 * holds the outgoing driving command
+
+## Ojo
+
+cada vez que se quiera ejecutar si ha fallado la vez anterior, se debe limpiar el contenido de la carpeta de fitness, weights, temp/parnts y temp/elite, por asegurar

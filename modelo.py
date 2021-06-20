@@ -14,10 +14,12 @@ class Modelo:
         # Capas ocultas
         layer2 = Dense(9, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer1)
         layer3 = Dense(6, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer2)
+        layer4 = Dense(4, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer3)
 
         # Capa de salida
-        outputsteer = Dense(1, activation='tanh', use_bias=True, bias_initializer='RandomNormal')(layer3)
-        outputspeed = Dense(1, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer3)
+        outputsteer = Dense(1, activation='tanh', use_bias=True, bias_initializer='RandomNormal')(layer4)
+        #outputspeed = Dense(1, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer3)
+        outputspeed = Dense(1, activation='tanh', use_bias=True, bias_initializer='RandomNormal')(layer4)
         output = concatenate([outputsteer, outputspeed])
 
         # Crear arquitectura del modelo
@@ -59,15 +61,18 @@ class Modelo:
     @staticmethod
     def inicializar_pesos():
         # Generar pesos aleatorios para nuevo Driver, en la primera generación
-        w_init = tf.keras.initializers.GlorotUniform()
-        b_init = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        #w_init = tf.keras.initializers.GlorotUniform()
+        w_init = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        b_init = tf.keras.initializers.RandomNormal(mean=0., stddev=2.)
         w1 = w_init(shape=(6, 9))
         b1 = b_init(shape=(9, ))
         w2 = w_init(shape=(9, 6))
         b2 = b_init(shape=(6, ))
-        w3 = w_init(shape=(6, 1))
-        b3 = b_init(shape=(1, ))
-        return [w1, b1, w2, b2, w3, b3, w3, b3]
+        w3 = w_init(shape=(6, 4))
+        b3 = b_init(shape=(4, ))
+        w4 = w_init(shape=(4, 1))
+        b4 = b_init(shape=(1, ))
+        return [w1, b1, w2, b2, w3, b3, w4, b4, w4, b4]
 
     @staticmethod
     def cargar_pesos(n):
@@ -77,11 +82,13 @@ class Modelo:
         b1 = chain[54:63].reshape((9,))
         w2 = chain[63:117].reshape((9, 6))
         b2 = chain[117:123].reshape((6,))
-        w3_1 = chain[123:129].reshape((6, 1))
-        b3_1 = chain[129].reshape((1,))
-        w3_2 = chain[130:136].reshape((6, 1))
-        b3_2 = chain[136].reshape((1,))
-        return [w1, b1, w2, b2, w3_1, b3_1, w3_2, b3_2]
+        w3 = chain[123:147].reshape((6, 4))
+        b3 = chain[147:151].reshape((4,))
+        w4_1 = chain[151:155].reshape((4, 1))
+        b4_1 = chain[155].reshape((1,))
+        w4_2 = chain[156:160].reshape((4, 1))
+        b4_2 = chain[160].reshape((1,))
+        return [w1, b1, w2, b2, w3, b3, w4_1, b4_1, w4_2, b4_2]
 
     @staticmethod
     def cargar_elite(n):
@@ -92,8 +99,10 @@ class Modelo:
         b1 = chain[54:63].reshape((9,))
         w2 = chain[63:117].reshape((9, 6))
         b2 = chain[117:123].reshape((6,))
-        w3_1 = chain[123:129].reshape((6, 1))
-        b3_1 = chain[129].reshape((1,))
-        w3_2 = chain[130:136].reshape((6, 1))
-        b3_2 = chain[136].reshape((1,))
-        return [w1, b1, w2, b2, w3_1, b3_1, w3_2, b3_2]
+        w3 = chain[123:147].reshape((6, 4))
+        b3 = chain[147:151].reshape((4,))
+        w4_1 = chain[151:155].reshape((4, 1))
+        b4_1 = chain[155].reshape((1,))
+        w4_2 = chain[156:160].reshape((4, 1))
+        b4_2 = chain[160].reshape((1,))
+        return [w1, b1, w2, b2, w3, b3, w4_1, b4_1, w4_2, b4_2]

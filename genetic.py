@@ -4,14 +4,19 @@ import random
 import tensorflow as tf
 
 
-def fitness_func(d, v, l, r):
+def fitness_func(d, v, l, r, p, a):
     # d = distance raced
     # v = average speed
     # l = laps
-    # R = average raycast measures
-    print(f'(d: {"{:.2f}".format(d)} | v: {"{:.2f}".format(v)} | l: {"{:.2f}".format(l)} | r: {"{:.2f}".format(r/(1+r))})')
+    # r = average middle raycast measures
+    # p = average position of the car from
+    # a = angle of the car from the center axis
+    print(f'(d: {"{:.2f}".format(d)} | v: {"{:.2f}".format(v)} | l: {"{:.2f}".format(l)} | r: {"{:.2f}".format(r)} | p: {"{:.2f}".format(p)} | a: {"{:.2f}".format(a)} )')
 
-    fit = (((d + v) * l * r) / (1 + r))
+    #fit = (d * l * r) / ((1 + r) * ((1+a)**2) * ((1+p)**3))
+    fit = ( (d * l * r) / ((1 + r) * (1+a)) )
+
+    print(fit)
 
     return fit
 
@@ -26,7 +31,7 @@ def guardar_fitness(fit):
     np.save("fitness/fitness.npy", fitness)
 
 
-def sus(fitness, index_orden):
+def sus(fitness, index_orden, n_padres):
     # Función que seleccióna a los padres de la siguiente generación siguiendo el "Muestreo universal estocástico" (SUS)
     # suma total de todos los valores del fitness
     total_fitness = np.sum(fitness)
@@ -35,7 +40,7 @@ def sus(fitness, index_orden):
     # sumatorio de los fitness para compararlos con la posición de los punteros
     sum_fitness = fitness[index_orden[j]]
     # número de punteros y por tanto de padres que se elegirán
-    n_punteros = 34
+    n_punteros = n_padres
     # array donde se guardará la posición que ocupan los padres dentro del array de fitness
     padres = np.zeros(n_punteros, dtype=int)
     # intervalo entre punteros
@@ -67,20 +72,26 @@ def crossover_multipunto(emparejamientos, padres, driver):
         # Carga los pesos de los padres
         padre1 = np.load(f"tmp/parents/pesos{padres[idx]}.npy", allow_pickle=True)
         padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy", allow_pickle=True)
-        # Selecciona un segmento a intercambiar
-        x = random.randint(0, len(padre1)-1)
-        y = random.randint(x, len(padre1))
         # Inicializa a los hijos
         hijo1 = np.zeros_like(padre1)
         hijo2 = np.zeros_like(padre2)
+
+        # Selecciona varios segmentos a intercambiar
+        x1 = random.randint(0, int(len(padre1)/2)-1)
+        x3 = random.randint(int(len(padre1)/2+1), len(padre1))
+        x2 = random.randint(x1, x3)
+        paring = np.random.randint(2, size=4)
+
         # Asigna los pesos a los hijos
         for i in range(0, len(padre1)):
-            if x < i <= y:
+            if (0 < i <= x1 and paring[0] == 1) or (x1 < i <= x2 and paring[1] == 1) or \
+               (x2 < i <= x3 and paring[2] == 1) or (x3 < i < len(padre1) and paring[3] == 1):
                 hijo1[i] = padre2[i]
                 hijo2[i] = padre1[i]
             else:
                 hijo1[i] = padre1[i]
                 hijo2[i] = padre2[i]
+
         # Guarda los pesos de los hijos
         np.save(f"weights/pesos{driver}.npy", hijo1)
         driver += 1
@@ -91,7 +102,7 @@ def crossover_multipunto(emparejamientos, padres, driver):
 def mutacion(driver):
     # Hace que los pesos de un driver cambien al menos una vez
     probabilidad_mutacion = 100
-    prob_sig_mutacion = 0.8
+    prob_sig_mutacion = 0.9
     mutando = True
     # Carga pesos a mutar
     pesos = np.load(f"weights/pesos{driver}.npy", allow_pickle=True)
@@ -101,7 +112,7 @@ def mutacion(driver):
             # Escoge un gen aleatorio
             gen = random.randint(0, len(pesos)-1)
             # Genera mutación
-            mut_init = tf.keras.initializers.GlorotUniform()
+            mut_init = tf.keras.initializers.RandomNormal(mean=0., stddev=3.)
             mut = mut_init(shape=(1,))
             # Aplica mutación
             pesos[gen] = mut

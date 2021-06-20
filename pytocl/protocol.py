@@ -87,7 +87,7 @@ class Client:
         """
 
         angles = self.driver.range_finder_angles
-        assert len(angles) == 19, \
+        assert len(angles) == 5, \
             'Inconsistent length {} of range of finder iterable.'.format(
                 len(angles)
             )
@@ -128,7 +128,7 @@ class Client:
                 self.stop()
 
             elif MSG_RESTART in buffer:
-                #Reiniciar carrera sale del bucle y vuelve a run.py
+                # Reiniciar carrera sale del bucle y vuelve a run.py
                 _logger.info('Server requested restart of driver.')
                 self.driver.on_restart()
                 Client.stop(self)
@@ -144,6 +144,8 @@ class Client:
                 buffer = self.serializer.encode(command.actuator_dict)
                 _logger.debug('Sending buffer {!r}.'.format(buffer))
                 self.socket.sendto(buffer, self.hostaddr)
+
+
 
         except socket.error as ex:
             _logger.warning('Communication with server failed: {}.'.format(ex))

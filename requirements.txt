@@ -1,6 +1,7 @@
 # --only-binary :all:
 # matplotlib
-numpy
+numpy~=1.19.5
 
-tensorflow
-Keras
+tensorflow~=2.5.0rc2
+Keras~=2.4.3
+matplotlib~=3.4.1

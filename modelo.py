@@ -19,7 +19,7 @@ class Modelo:
         # Capa de salida
         outputsteer = Dense(1, activation='tanh', use_bias=True, bias_initializer='RandomNormal')(layer4)
         #outputspeed = Dense(1, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer3)
-        outputspeed = Dense(1, activation='tanh', use_bias=True, bias_initializer='RandomNormal')(layer4)
+        outputspeed = Dense(1, activation='sigmoid', use_bias=True, bias_initializer='RandomNormal')(layer4)
         output = concatenate([outputsteer, outputspeed])
 
         # Crear arquitectura del modelo
@@ -63,7 +63,7 @@ class Modelo:
         # Generar pesos aleatorios para nuevo Driver, en la primera generación
         #w_init = tf.keras.initializers.GlorotUniform()
         w_init = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
-        b_init = tf.keras.initializers.RandomNormal(mean=0., stddev=2.)
+        b_init = tf.keras.initializers.RandomNormal(mean=0., stddev=0.5)
         w1 = w_init(shape=(6, 9))
         b1 = b_init(shape=(9, ))
         w2 = w_init(shape=(9, 6))

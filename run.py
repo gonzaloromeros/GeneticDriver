@@ -13,15 +13,18 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
 
+    # Entrena o Infiere
     train = False
+
+    # Drivers por cada tipo de selección (población)
+    elite = 5
+    nuevos = 10
+    n_padres = 25
+
     if train:
         # Aplica el Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
-        generaciones = 351  # Generaciones +1
+        generaciones = 501  # Generaciones +1
 
-        # Drivers por cada tipo de selección (población)
-        elite = 4
-        nuevos = 10
-        n_padres = 26
         # Población de cada generación
         poblacion = int(elite + nuevos + n_padres*2)
 
@@ -40,7 +43,7 @@ if __name__ == '__main__':
                     repite = False
                     print(f'Driver {i+1}:')
                     main(MyDriver(logdata=False, generation=g, n=i))
-                    '''
+                    '''---------------------------------------------------------------------------------------- 
                     if g > 1:
                         # Cada Driver hace otro intento para asegurar que los resultados sean confiables
                         main(MyDriver(logdata=False, generation=g, n=i))
@@ -60,7 +63,7 @@ if __name__ == '__main__':
                                     pesos = np.concatenate((pesos, pesos_init[idx]), axis=None)
                             np.save(f"weights/pesos{i}.npy", pesos)
                         np.save(f"fitness/fitness.npy", fitness)
-                    '''
+                    ----------------------------------------------------------------------------------------- '''
                 print('-------------------------------')
 
             # Carga fitness
@@ -104,21 +107,25 @@ if __name__ == '__main__':
                 np.save(f"weights/pesos{i}.npy", pesos)
 
             # - Completamente nuevos
-            for i in range(elite, elite+nuevos):
+            init_nuevos = np.trunc(nuevos / 4)
+            for i in range(elite, elite + nuevos):
                 pesos_init = Modelo.inicializar_pesos()
                 pesos = np.concatenate((pesos_init[0], pesos_init[1]), axis=None)
                 for idx, peso in enumerate(pesos_init):
                     if idx >= 2:
                         pesos = np.concatenate((pesos, pesos_init[idx]), axis=None)
+                if init_nuevos > 0:
+                    init_nuevos -= 1
+                else:
+                    pesos = genetic.mezclar_pesos_inicio(pesos, poblacion)
                 np.save(f"weights/pesos{i}.npy", pesos)
-
             # *
             # - Termina el emparejamiento de los padres
             genetic.crossover_multipunto(emparejamientos, padres, elite+nuevos)
 
             # Mutaciones
             for i in range(elite, poblacion):
-                if 6 > random.randint(0, 100):
+                if 15 > random.randint(0, 100):
                     genetic.mutacion(i)
 
     else:
@@ -140,10 +147,9 @@ if __name__ == '__main__':
         plt.show()
 
         # Probar con los 4 Drivers que haya conseguido más fitness en el entrenamiento
-        for i in range(0, 4):
+        for i in range(0, elite):
             print(f'Driver {i + 1}:')
             main(MyDriver(logdata=False, generation=-1, n=i))
 
             print('-------------------------------')
-
 

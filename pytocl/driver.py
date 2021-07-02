@@ -25,7 +25,8 @@ class Driver:
         self.equidistance_av = np.zeros(2)
         self.angle_av = np.zeros(2)
         self.distance_raced = 0.0
-        self.time_pred = 0
+        self.time = 0.0
+        self.time_pred = 0.0
         self.prediction = np.zeros((1, 3))
         self.modelo = Modelo(generation, n)
         self.data_logger = DataLogWriter() if logdata else None

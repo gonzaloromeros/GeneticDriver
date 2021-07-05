@@ -17,9 +17,9 @@ if __name__ == '__main__':
     train = False
 
     # Drivers por cada tipo de selección (población)
-    elite = 5
+    elite = 3
     nuevos = 10
-    n_padres = 25
+    n_padres = 30
 
     if train:
         # Aplica el Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
@@ -43,7 +43,7 @@ if __name__ == '__main__':
                     repite = False
                     print(f'Driver {i+1}:')
                     main(MyDriver(logdata=False, generation=g, n=i))
-                    '''---------------------------------------------------------------------------------------- 
+                    '''----------------------------------------------------------------------------------------
                     if g > 1:
                         # Cada Driver hace otro intento para asegurar que los resultados sean confiables
                         main(MyDriver(logdata=False, generation=g, n=i))
@@ -75,13 +75,10 @@ if __name__ == '__main__':
             # Ordenar por peso de mayor a menor
             index_orden = np.argsort(-fitness)
 
-            # Escribe en un fichero de texto los datos para poder graficarlo
-            graph_file = open("fitness/fitness_graph.txt", 'a')
-            graph_file.write(f'{g},{"{:.2f}".format(np.average(fitness))},{"{:.2f}".format(fitness[index_orden[0]])}\n')
-
-            # Selección nueva generación --> 80 individuos
-            # - Stochastic universal sampling (SUS) (n_padres x 2 hijos)
+            # Selección nueva generación
+            # Preparacion para emparejar a los padres
             padres = genetic.sus(fitness, index_orden, n_padres)
+            print(padres)  # TODO:quitar esto
             # Limpia carpeta antes de añadir pesos
             for i in range(0, poblacion):
                 if os.path.isfile(f"tmp/parents/pesos{i}.npy"):
@@ -89,7 +86,7 @@ if __name__ == '__main__':
             # Copia pesos de padres correspondientes
             for driver in padres:
                 genetic.copiar_pesos(driver, 'parents')
-            # -- Devuelve un array emparejando el indice con su valor
+            # Devuelve un array emparejando el indice con su valor
             emparejamientos = np.random.permutation(np.arange(len(padres)))
             # *
 
@@ -101,13 +98,13 @@ if __name__ == '__main__':
             # Copia los pesos con fitness más altos en la siguiente generación
             for i in range(0, elite):
                 genetic.copiar_pesos(index_orden[i], 'elite')
-            # -- Se sustituyen los 4 primeros pesos por los mejores Drivers de la generación anterior
+            # Se sustituyen los 4 primeros pesos por los mejores Drivers de la generación anterior
             for i in range(0, elite):
                 pesos = np.load(f"tmp/elite/pesos{index_orden[i]}.npy", allow_pickle=True)
                 np.save(f"weights/pesos{i}.npy", pesos)
 
             # - Completamente nuevos
-            init_nuevos = np.trunc(nuevos / 4)
+            init_nuevos = np.trunc(nuevos / 3)
             for i in range(elite, elite + nuevos):
                 pesos_init = Modelo.inicializar_pesos()
                 pesos = np.concatenate((pesos_init[0], pesos_init[1]), axis=None)
@@ -119,14 +116,23 @@ if __name__ == '__main__':
                 else:
                     pesos = genetic.mezclar_pesos_inicio(pesos, poblacion)
                 np.save(f"weights/pesos{i}.npy", pesos)
+
             # *
-            # - Termina el emparejamiento de los padres
-            genetic.crossover_multipunto(emparejamientos, padres, elite+nuevos)
+            # Termina el emparejamiento de los padres
+            # - Stochastic universal sampling (SUS) (n_padres x 2 hijos)
+            #n_hijos = int(np.trunc(len(emparejamientos)/2))
+            n_hijos = int(np.trunc(len(emparejamientos)/1.5))
+            genetic.crossover_multipunto(emparejamientos[:n_hijos], padres, elite+nuevos)
+            genetic.crossover_gen(emparejamientos[n_hijos:], padres, elite+nuevos+n_hijos, n_hijos)
 
             # Mutaciones
             for i in range(elite, poblacion):
                 if 15 > random.randint(0, 100):
                     genetic.mutacion(i)
+
+            # Escribe en un fichero de texto los datos para poder graficarlo
+            graph_file = open("fitness/fitness_graph.txt", 'a')
+            graph_file.write(f'{g},{"{:.2f}".format(np.average(fitness))},{"{:.2f}".format(fitness[index_orden[0]])}\n')
 
     else:
         # Grafica los datos recogidos (rojo mejor Driver) (verde media de fitness)

@@ -11,7 +11,7 @@ class MyDriver(Driver):
         command = Command()
 
         raycasts = np.array(carstate.distances_from_edge)[[0, 3, 9, 15, 18]]
-        self.distance_raced = carstate.distance_raced
+        #self.distance_raced = carstate.distance_raced
 
         if self.time < math.trunc(carstate.current_lap_time) and np.average(raycasts) != 1:
             # Ajusta tiempo
@@ -19,7 +19,7 @@ class MyDriver(Driver):
             self.time += carstate.current_lap_time
             # Predicción del modelo
             #self.prediction = self.modelo.inferir_modelo(raycasts, carstate.speed_x)
-            self.prediction = self.modelo.inferir_modelo(raycasts, 1)
+            self.prediction = self.modelo.inferir_modelo(raycasts)
 
         #TODO: afafgawg
         # Cada medio segundo se hace la predicción
@@ -49,10 +49,17 @@ class MyDriver(Driver):
         if self.time_pred < carstate.current_lap_time or \
                 (self.speed_av[1] == 0 and carstate.current_lap_time > 0):
             # Añadimos los segundos necesarios
-            self.time_pred += 0.5
+            self.time_pred += 0.2
+
+            if abs(carstate.angle) < 10:
+                self.distance_raced = carstate.distance_raced
+
             # Preprocesamiento para fitness
             self.speed_av[0] += carstate.speed_x
-            self.raycast_av[0] += (np.average(raycasts) + raycasts[2])/2  # TODO: raycasts[2]
+            #self.raycast_av[0] += (np.average(raycasts) + raycasts[2])/2  # TODO: raycasts[2]
+            #self.raycast_av[0] += np.average(raycasts)
+            #self.raycast_av[0] += (raycasts[1]+raycasts[2]+raycasts[3])/3
+            self.raycast_av[0] += (raycasts[1]+raycasts[3])/2
             self.equidistance_av[0] += abs(carstate.distance_from_center)
             self.angle_av[0] += abs(carstate.angle)
             self.speed_av[1] += 1
@@ -60,26 +67,24 @@ class MyDriver(Driver):
             self.equidistance_av[1] += 1
             self.angle_av[1] += 1
 
-
-
         command.steering = self.prediction[0, 0]
         #TODO: ada
-        # '''
+        '''----------------
         if self.prediction[0, 1] >= 0:
             # Se divide entre 2 para que el acelerador no lo pueda llevar al máximo y evitar altas velocidades
-            command.accelerator = (self.prediction[0, 1])/1.4 #TODO: /1.5
+            command.accelerator = (self.prediction[0, 1])  #TODO: /1.2
             command.brake = 0
         else:
-            command.brake = abs(self.prediction[0, 1])/1.8
+            command.brake = abs(self.prediction[0, 1])/1.5
             command.accelerator = 0
-        # '''
-        #command.accelerator = 0.4  # TODO: aweda
-        #command.brake = 0
+         --------- '''
+        command.accelerator = 0.4  # TODO: aweda
+        command.brake = 0
 
         command.gear = self.caja_cambios(carstate.rpm, carstate.gear, self.time)
 
         if carstate.distance_from_center < -1 or 1 < carstate.distance_from_center or \
-                (carstate.current_lap_time > 3 > carstate.speed_x) or np.average(raycasts) == -1:
+                (carstate.current_lap_time > 4 > carstate.speed_x) or np.average(raycasts) == -1:
             command.meta = 1
 
         return command
@@ -89,7 +94,7 @@ class MyDriver(Driver):
         # Controlar las marchas max permitido 6, pero lo capamos a 3 para que no aumente demasiado su velocidad
         if time < 1:
             gear = 1
-        elif rpm >= 7500 and gear != 3:
+        elif rpm >= 7500 and gear != 1:
             gear += 1
         elif rpm <= 4000 and gear != 1:
             gear -= 1

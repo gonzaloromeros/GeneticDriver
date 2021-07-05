@@ -28,7 +28,18 @@ def fitness_func(d, v, l, r, p, a, t):
     #fit = ((d*2+t)*2)/(p+a) # 89m Gnz
     #fit = (d * 0.4) + ((l * 42) / (t * 0.2))  # 15m Jv
     #fit = ((d * 0.4) + (l * 42)) / (t * 0.2)  # 15m Jv
-    fit = (((d+v)+((t*4)/(p+a)))*r)*0.1*l  # 158m Gnz
+    ##fit = (((d+v)+((t*4)/(p+a)))*r)*0.1*l  # 158m Gnz
+
+    #fit = ((r**2/(1+p))*(d/50)*l) * .02
+
+    #fit = (r + d**2) / (1 + a)  # 468m Gnz #TODO: probar esta con los raycast de 45º
+    #fit = (r * (np.trunc(d/5))**2) / 50
+
+    #fit = np.trunc(d/5) + 1
+
+    #fit = (np.trunc(d/5) + 1) ** 2
+
+    fit = (d/3)**2
 
     print(fit)
     return fit
@@ -47,7 +58,7 @@ def guardar_fitness(fit):
 def sus(fitness, index_orden, n_padres):
     # Función que seleccióna a los padres de la siguiente generación siguiendo el "Muestreo universal estocástico" (SUS)
     # suma total de todos los valores del fitness
-    total_fitness = np.sum(fitness)
+    total_fitness = (np.average(fitness)*len(fitness))
     # iterador para controlar en que parte de los individuos estamos
     j = 0
     # sumatorio de los fitness para compararlos con la posición de los punteros
@@ -59,7 +70,7 @@ def sus(fitness, index_orden, n_padres):
     # intervalo entre punteros
     intervalo = total_fitness / n_punteros
     # posición inicial donde empezará el primer puntero
-    puntero = np.random.uniform(0., intervalo-0.01)
+    puntero = np.random.uniform(0., intervalo-0.1)
 
     for i in range(n_punteros):
         sig = False
@@ -80,36 +91,85 @@ def copiar_pesos(driver, carpeta):
 
 
 def crossover_multipunto(emparejamientos, padres, driver):
-    # Genera toda la descendencia de los emparejamientos dados
+    # Genera descendencia de los emparejamientos dados intercambiando 4 cadenas de genes
     for idx, val in enumerate(emparejamientos):
-        # Carga los pesos de los padres
-        padre1 = np.load(f"tmp/parents/pesos{padres[idx]}.npy", allow_pickle=True)
-        padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy", allow_pickle=True)
-        # Inicializa a los hijos
-        hijo1 = np.zeros_like(padre1)
-        hijo2 = np.zeros_like(padre2)
+        if idx != val:
+            # Carga los pesos de los padres
+            padre1 = np.load(f"tmp/parents/pesos{padres[idx]}.npy", allow_pickle=True)
+            padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy", allow_pickle=True)
+            # Inicializa a los hijos
+            hijo1 = np.zeros_like(padre1)
+            hijo2 = np.zeros_like(padre2)
 
-        # Selecciona varios segmentos a intercambiar
-        x1 = random.randint(0, int(len(padre1)/2)-1)
-        x3 = random.randint(int(len(padre1)/2+1), len(padre1))
-        x2 = random.randint(x1, x3)
-        paring = np.random.randint(2, size=4)
+            # Selecciona varios segmentos a intercambiar
+            x1 = random.randint(0, int(len(padre1)/2)-1)
+            x3 = random.randint(int(len(padre1)/2+1), len(padre1))
+            x2 = random.randint(x1, x3)
+            paring = np.random.randint(2, size=4)
 
-        # Asigna los pesos a los hijos
-        for i in range(0, len(padre1)):
-            if (0 < i <= x1 and paring[0] == 1) or (x1 < i <= x2 and paring[1] == 1) or \
-               (x2 < i <= x3 and paring[2] == 1) or (x3 < i < len(padre1) and paring[3] == 1):
-                hijo1[i] = padre2[i]
-                hijo2[i] = padre1[i]
-            else:
-                hijo1[i] = padre1[i]
-                hijo2[i] = padre2[i]
+            # Asigna los pesos a los hijos
+            for i in range(0, len(padre1)):
+                if (0 < i <= x1 and paring[0] == 1) or (x1 < i <= x2 and paring[1] == 1) or \
+                   (x2 < i <= x3 and paring[2] == 1) or (x3 < i < len(padre1) and paring[3] == 1):
+                    hijo1[i] = padre2[i]
+                    hijo2[i] = padre1[i]
+                else:
+                    hijo1[i] = padre1[i]
+                    hijo2[i] = padre2[i]
 
-        # Guarda los pesos de los hijos
-        np.save(f"weights/pesos{driver}.npy", hijo1)
-        driver += 1
-        np.save(f"weights/pesos{driver}.npy", hijo2)
-        driver += 1
+            # Guarda los pesos de los hijos
+            np.save(f"weights/pesos{driver}.npy", hijo1)
+            driver += 1
+            np.save(f"weights/pesos{driver}.npy", hijo2)
+            driver += 1
+        else:
+            mutacion(driver)
+            driver += 1
+            mutacion(driver)
+            driver += 1
+
+
+def crossover_gen(emparejamientos, padres, driver, n_hijos):
+    # Genera descendencia de los emparejamientos dados intercambiando genes unitariamente
+    probabilidad_cambio_gen = 100
+    prob_sig_cambio = 0.60
+    for idx, val in enumerate(emparejamientos):
+        if idx != val:
+            # Carga los pesos de los padres
+            padre1 = np.load(f"tmp/parents/pesos{padres[idx+n_hijos]}.npy", allow_pickle=True)
+            padre2 = np.load(f"tmp/parents/pesos{padres[val]}.npy", allow_pickle=True)
+            # Inicializa a los hijos
+            hijo1 = np.zeros_like(padre1)
+            hijo2 = np.zeros_like(padre2)
+
+            emparejando = True
+            while emparejando:
+                if random.randint(0, 100) <= probabilidad_cambio_gen:
+                    # Selecciona gen a intercambiar
+                    gen = random.randint(0, int(len(padre1) - 1))
+                    # Asigna los pesos a los hijos
+                    for i in range(0, len(padre1)):
+                        if i == gen:
+                            hijo1[i] = padre2[i]
+                            hijo2[i] = padre1[i]
+                        else:
+                            hijo1[i] = padre1[i]
+                            hijo2[i] = padre2[i]
+                    probabilidad_cambio_gen = probabilidad_cambio_gen * prob_sig_cambio
+                else:
+                    # Termina el emparejamiento
+                    emparejando = False
+
+            # Guarda los pesos de los hijos
+            np.save(f"weights/pesos{driver}.npy", hijo1)
+            driver += 1
+            np.save(f"weights/pesos{driver}.npy", hijo2)
+            driver += 1
+        else:
+            mutacion(driver)
+            driver += 1
+            mutacion(driver)
+            driver += 1
 
 
 def mezclar_pesos_inicio(pesos, poblacion):
@@ -136,7 +196,7 @@ def mezclar_pesos_inicio(pesos, poblacion):
 def mutacion(driver):
     # Hace que los pesos de un Driver cambien al menos una vez
     probabilidad_mutacion = 100
-    prob_sig_mutacion = 0.9
+    prob_sig_mutacion = 0.7
     mutando = True
     # Carga pesos a mutar
     pesos = np.load(f"weights/pesos{driver}.npy", allow_pickle=True)

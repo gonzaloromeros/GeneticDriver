@@ -16,12 +16,13 @@ class Driver:
     command within 10ms wall time.
     """
 
-    def __init__(self, logdata=True, generation=-1, n=-1):
+    def __init__(self, logdata=True, generation=-1, n=-1, max_gear=1):
         self.generation = generation
         self.n = n
+        self.max_gear = max_gear
         self.lap = 1
-        self.speed_av = np.zeros(2)
-        self.raycast_av = np.zeros(50)
+        self.speed_av = np.zeros(15)
+        self.raycast_av = np.zeros(15)
         self.equidistance_av = np.zeros(2)
         self.angle_av = np.zeros(2)
         self.distance_raced = 0.0

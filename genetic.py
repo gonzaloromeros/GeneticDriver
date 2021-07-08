@@ -14,41 +14,8 @@ def fitness_func(d, v, l, r, p, a, t):
     # t = tiempo con precisión de 0.5s
     print(f'(d: {"{:.2f}".format(d)} | v: {"{:.2f}".format(v)} | l: {"{:.2f}".format(l)} | r: {"{:.2f}".format(r)} | p: {"{:.2f}".format(p)} | a: {"{:.2f}".format(a)} | t: {"{:.2f}".format(t)})')
 
-    #fit = (d * l * r) / ((1 + r) * ((1+a)**2) * ((1+p)**3))
-    #fit = ( (d * l * r) / ((1 + r) * (1+a)) )
-
-    #fit = ( ((d**2 + t) * l) / (1 + p + a) )
-    #fit = (((d + t) * l) / (1 + a))
-    #fit = ( ((d + t) * l * r) / ((1 + r) * (1 + p)) )
-    #fit = ((d + v) * l * r) / (((1+a)**2) * ((1+p)**3))
-
-    #fit = ((d + v) * l * r) / (1 + a)
-
-    #fit = (d**2 + v + r - p - a + t) / 2  # 102m Brn
-    #fit = ((d*2+t)*2)/(p+a) # 89m Gnz
-    #fit = (d * 0.4) + ((l * 42) / (t * 0.2))  # 15m Jv
-    #fit = ((d * 0.4) + (l * 42)) / (t * 0.2)  # 15m Jv
-    ##fit = (((d+v)+((t*4)/(p+a)))*r)*0.1*l  # 158m Gnz
-
-    #fit = ((r**2/(1+p))*(d/50)*l) * .02
-
-    #fit = (r + d**2) / (1 + a)  # 468m Gnz #TODO: probar esta con los raycast de 45º
-    #fit = (r * (np.trunc(d/5))**2) / 50
-
-    #fit = np.trunc(d/5) + 1
-
-    #fit = (np.trunc(d/5) + 1) ** 2
-
-    # fit = (((d+v)+((t*4)/(p+a)))*r)*0.1*l  # 158m Gnz
-    # fit = (d/3)**2  # 142m Gnz
-    # fit = ((d/2) * l) / v # -m
-    #fit = ((d/4)**2 * l) / v
-    #fit = (round(d/5,1) + 1)**2 * l ---------ROTO
-
-    #fit = (np.trunc(d) + 1) * l
-
     fit = (np.trunc(d/2)**1.2 * l * r) / (1 + r)
-    #fit = d**1.2
+    #fit = (np.trunc(d/2)**1.5 * l) / (1 + abs( (r/(30+r)) - (v/(30+v)) ))**2
 
     print(fit)
     return fit
@@ -62,38 +29,6 @@ def guardar_fitness(fit):
     else:
         fitness = np.array([fit])
     np.save("fitness/fitness.npy", fitness)
-
-
-'''
-def sus(fitness, index_orden, n_padres):
-    # Función que seleccióna a los padres de la siguiente generación siguiendo el "Muestreo universal estocástico" (SUS)
-    # suma total de todos los valores del fitness
-    total_fitness = (np.average(fitness)*len(fitness))
-    # iterador para controlar en que parte de los individuos estamos
-    j = 0
-    # sumatorio de los fitness para compararlos con la posición de los punteros
-    sum_fitness = fitness[index_orden[j]]
-    # número de punteros y por tanto de padres que se elegirán
-    n_punteros = n_padres
-    # array donde se guardará la posición que ocupan los padres dentro del array de fitness
-    padres = np.zeros(n_punteros, dtype=int)
-    # intervalo entre punteros
-    intervalo = total_fitness / n_punteros
-    # posición inicial donde empezará el primer puntero
-    puntero = np.random.uniform(0., intervalo-0.1)
-
-    for i in range(n_punteros):
-        sig = False
-        while not sig:
-            if puntero < sum_fitness:
-                padres[i] = index_orden[j]
-                puntero += intervalo
-                sig = True
-            else:
-                j += 1
-                sum_fitness += fitness[index_orden[j]]
-    return padres
-'''
 
 
 def sus(fitness, index_orden, n_padres):
@@ -228,10 +163,9 @@ def crossover_multipunto(emparejamientos, padres, driver):
             driver += 1
 
 
-def crossover_gen(emparejamientos, padres, driver):
+def crossover_genes(emparejamientos, padres, driver):
     # Genera descendencia de los emparejamientos dados intercambiando genes unitariamente
-    probabilidad_cambio_gen = 100
-    prob_sig_cambio = 0.60
+    probabilidad_cambio_gen = 50
     for idx, val in enumerate(emparejamientos):
         if idx != val:
             # Carga los pesos de los padres
@@ -241,23 +175,14 @@ def crossover_gen(emparejamientos, padres, driver):
             hijo1 = np.zeros_like(padre1)
             hijo2 = np.zeros_like(padre2)
 
-            emparejando = True
-            while emparejando:
-                if random.randint(0, 100) <= probabilidad_cambio_gen:
-                    # Selecciona gen a intercambiar
-                    gen = random.randint(0, int(len(padre1) - 1))
-                    # Asigna los pesos a los hijos
-                    for i in range(0, len(padre1)):
-                        if i == gen:
-                            hijo1[i] = padre2[i]
-                            hijo2[i] = padre1[i]
-                        else:
-                            hijo1[i] = padre1[i]
-                            hijo2[i] = padre2[i]
-                    probabilidad_cambio_gen = probabilidad_cambio_gen * prob_sig_cambio
+            for i in range(0, len(padre1)):
+                # Intercambia gen por gen con un 50% de probabilidad
+                if random.randint(1, 100) <= probabilidad_cambio_gen:
+                    hijo1[i] = padre2[i]
+                    hijo2[i] = padre1[i]
                 else:
-                    # Termina el emparejamiento
-                    emparejando = False
+                    hijo1[i] = padre1[i]
+                    hijo2[i] = padre2[i]
 
             # Guarda los pesos de los hijos
             np.save(f"weights/pesos{driver}.npy", hijo1)
@@ -297,7 +222,7 @@ def mezclar_pesos_inicio(pesos, poblacion):
 def mutacion(driver):
     # Hace que los pesos de un Driver cambien al menos una vez
     probabilidad_mutacion = 100
-    prob_sig_mutacion = 0.5
+    prob_sig_mutacion = 0.7
     mutando = True
     # Carga pesos a mutar
     pesos = np.load(f"weights/pesos{driver}.npy", allow_pickle=True)

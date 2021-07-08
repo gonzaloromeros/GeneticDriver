@@ -17,9 +17,9 @@ if __name__ == '__main__':
     train = False
 
     # Drivers por cada tipo de selección (población)
-    elite = 3
-    nuevos = 8
-    n_padres = 14
+    elite = 5
+    nuevos = 10
+    n_padres = 15
 
     if train:
         # Aplica el Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
@@ -42,11 +42,11 @@ if __name__ == '__main__':
                 while repite:
                     repite = False
                     print(f'Driver {i+1}:')
-                    main(MyDriver(logdata=False, generation=g, n=i))
-                    '''----------------------------------------------------------------------------------------
+                    main(MyDriver(logdata=False, generation=g, n=i, max_gear=1))
+                    '''----------------------------------------------------------------------------------------'''
                     if g > 1:
                         # Cada Driver hace otro intento para asegurar que los resultados sean confiables
-                        main(MyDriver(logdata=False, generation=g, n=i))
+                        main(MyDriver(logdata=False, generation=g, n=i, max_gear=3))
                         # Calcula media del fitness del Driver
                         fitness = np.load("fitness/fitness.npy", allow_pickle=True)
                         fit = np.average(fitness[-2:])
@@ -63,7 +63,7 @@ if __name__ == '__main__':
                                     pesos = np.concatenate((pesos, pesos_init[idx]), axis=None)
                             np.save(f"weights/pesos{i}.npy", pesos)
                         np.save(f"fitness/fitness.npy", fitness)
-                    ----------------------------------------------------------------------------------------- '''
+                    '''----------------------------------------------------------------------------------------- '''
                 print('-------------------------------')
 
             # Carga fitness
@@ -119,13 +119,12 @@ if __name__ == '__main__':
             # Devuelve un array emparejando el indice con su valor
             emparejamientos1 = np.random.permutation(np.arange(len(padres)))
             emparejamientos2 = np.random.permutation(np.arange(len(padres)))
+            emparejamientos3 = np.random.permutation(np.arange(len(padres)))
             # (n_padres x 4 hijos)
             n_hijos = len(emparejamientos1)
-            genetic.crossover_simple(emparejamientos1, padres, elite + nuevos)
-            genetic.crossover_multipunto(emparejamientos2, padres, elite + nuevos + n_hijos)
-
-            #genetic.crossover_multipunto(emparejamientos[:n_hijos], padres, elite+nuevos)
-            #genetic.crossover_gen(emparejamientos[n_hijos:], padres, elite+nuevos+n_hijos)
+            #genetic.crossover_simple(emparejamientos1, padres, elite + nuevos)
+            genetic.crossover_multipunto(emparejamientos2, padres, elite + nuevos)
+            genetic.crossover_genes(emparejamientos3, padres, elite + nuevos + n_hijos*2)
 
             # Mutaciones
             for i in range(elite+1, poblacion):
@@ -134,7 +133,7 @@ if __name__ == '__main__':
 
             # Escribe en un fichero de texto los datos para poder graficarlo
             graph_file = open("fitness/fitness_graph.txt", 'a')
-            graph_file.write(f'{g},{"{:.2f}".format(np.average(fitness))},{"{:.2f}".format(fitness[index_orden[0]])},{"{:.2f}".format((fitness[index_orden[0]]+fitness[index_orden[1]])/2)}\n')
+            graph_file.write(f'{g},{"{:.2f}".format(np.average(fitness))},{"{:.2f}".format(fitness[index_orden[0]])},{"{:.2f}".format((fitness[index_orden[1]]+fitness[index_orden[2]])/2)}\n')
 
     else:
         # Grafica los datos recogidos (rojo mejor Driver) (verde media de fitness)
@@ -157,10 +156,10 @@ if __name__ == '__main__':
         plt.plot(xs, ys, '-g')
         plt.show()
 
-        # Probar con los 4 Drivers que haya conseguido más fitness en el entrenamiento
+        # Probar con los Drivers que haya conseguido más fitness en el entrenamiento
         for i in range(0, elite):
             print(f'Driver {i + 1}:')
-            main(MyDriver(logdata=False, generation=-1, n=i))
+            main(MyDriver(logdata=False, generation=-1, n=i, max_gear=1))
 
             print('-------------------------------')
 

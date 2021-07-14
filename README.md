@@ -1,29 +1,48 @@
-# Python client for TORCS with network plugin for the 2012 SCRC
+# Genetic Driver
+## for TORCS
 
-This is a copy of the reimplementation in Python 3 by @moltob of the original SCRC TORCS client pySrcrcClient from @lanquarden. It is used to teach ideas of computational intelligence. The file `my_driver.py` contains a shell to start writing your own driver.
+	Genetic Algorithm implementation for the TORCS SCR Championship software, using Python 3 and Keras.
 
-## `Client`
+## `My_Driver`
+	Has all the functionalities of the driving logic and execute the commands for the car actuation.
+	
+## `Run`
+	Main entrance of the program, has the structure of the Genetic Algorithm.
 
-* top level class
-* handles _all_ aspects of networking (connection management, encoding)
-* decodes class `State` from message from server, `state = self.decode(msg)`
-* encodes class `Command` for message to server, `msg = self.encode(command)`
-* internal state connection properties only and driver instance
-* use `Client(driver=your_driver, <other options>)` to use your own driver
+## `Genetics`
+	Python file with all the implementations of the Genetic Algorithm functions.
+	
+## `Modelo`
+	Implementation of the Neural Network architecture with Keras and the management of it's weights.
+	
 
-## `Driver`
+## Fork of torcs-client
+-------------------------------------------
+	## Python client for TORCS with network plugin for the 2012 SCRC
 
-* encapsulates driving logic only
-* main entry point: `drive(state: State) -> Command`
+	This is a copy of the reimplementation in Python 3 by @moltob of the original SCRC TORCS client pySrcrcClient from @lanquarden. It is used to teach ideas of computational intelligence. The file `my_driver.py` contains a shell to start writing your own driver.
 
-## `State`
+	### `Client`
 
-* represents the incoming car state
+	* top level class
+	* handles _all_ aspects of networking (connection management, encoding)
+	* decodes class `State` from message from server, `state = self.decode(msg)`
+	* encodes class `Command` for message to server, `msg = self.encode(command)`
+	* internal state connection properties only and driver instance
+	* use `Client(driver=your_driver, <other options>)` to use your own driver
 
-## `Command`
+	### `Driver`
 
-* holds the outgoing driving command
+	* encapsulates driving logic only
+	* main entry point: `drive(state: State) -> Command`
 
-## Ojo
+	### `State`
 
-cada vez que se quiera ejecutar si ha fallado la vez anterior, se debe limpiar el contenido de la carpeta de fitness, weights, temp/parnts y temp/elite, por asegurar
+	* represents the incoming car state
+
+	### `Command`
+
+	* holds the outgoing driving command
+
+
+

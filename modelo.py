@@ -8,13 +8,12 @@ import os
 class Modelo:
 
     def __init__(self, generation, n):
+        # Creación del modelo, aquí se pueden variar las funciones de activación usadas en cada capa
         # Capa de entrada
         layer1 = Input(shape=(5,))
-
         # Capas ocultas
-        layer2 = Dense(5, activation='relu', use_bias=True, kernel_initializer='random_uniform', bias_initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.))(layer1)
+        layer2 = Dense(5, activation='sigmoid', use_bias=True, kernel_initializer='random_uniform', bias_initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.))(layer1)
         layer3 = Dense(3, activation='sigmoid', use_bias=True, kernel_initializer='random_uniform', bias_initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.))(layer2)
-
         # Capa de salida
         outputsteer = Dense(1, activation='tanh', use_bias=True, kernel_initializer='random_uniform', bias_initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.))(layer3)
         outputspeed = Dense(1, activation='sigmoid', use_bias=True, kernel_initializer='random_uniform', bias_initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.))(layer3)

@@ -21,14 +21,15 @@ class Driver:
         self.n = n
         self.max_gear = max_gear
         self.lap = 1
-        self.speed_av = np.zeros(15)
-        self.raycast_av = np.zeros(15)
-        self.equidistance_av = np.zeros(2)
+        self.speed_av = np.zeros(20)
+        self.raycast_av = np.zeros(20)
+        self.equidistance_av = np.zeros(20)
         self.angle_av = np.zeros(2)
         self.distance_raced = 0.0
+        self.last_lap = 0.0
         self.time = 0.0
         self.time_pred = 1.0
-        self.prediction = np.zeros((1, 3))
+        self.prediction = np.zeros((1, 2))
         self.modelo = Modelo(generation, n)
         self.data_logger = DataLogWriter() if logdata else None
 

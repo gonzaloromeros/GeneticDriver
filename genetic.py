@@ -1,22 +1,23 @@
 import numpy as np
 import os
 import random
-import tensorflow as tf
 
 
 def fitness_func(d, v, l, r, p, a, t):
-    # d = distance raced
-    # v = average speed
-    # l = laps
-    # r = average middle raycast measures
-    # p = average position of the car from the center
-    # a = average angle of the car from the center axis
-    # t = tiempo con precisión de 0.5s
+    # d = distancia recorrida (distance raced)
+    # v = velocidad media (average speed)
+    # l = vueltas (laps)
+    # r = media de la media de los raycasts (average raycasts measures)
+    # p = posición media con respecto al centro de la pista [0 = centro] (average position of the car from the center)
+    # a = angulo medio con respecto al eje de la pista [0 = paralelo] (average angle of the car from the center axis)
+    # t = tiempo en segundos (time in seconds)
     print(f'(d: {"{:.2f}".format(d)} | v: {"{:.2f}".format(v)} | l: {"{:.2f}".format(l)} | r: {"{:.2f}".format(r)} | p: {"{:.2f}".format(p)} | a: {"{:.2f}".format(a)} | t: {"{:.2f}".format(t)})')
 
-    fit = (np.trunc(d/2)**1.2 * l * r) / (1 + r)
-    #fit = (np.trunc(d/2)**1.5 * l) / (1 + abs( (r/(30+r)) - (v/(30+v)) ))**2
+    # Función fitness, sustituir si se quiere modificar
+    fit = (np.trunc(d/2) * l * r) / (1 + r)
 
+    if fit < 0:
+        fit = 0.0
     print(fit)
     return fit
 

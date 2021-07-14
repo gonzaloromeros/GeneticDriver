@@ -6,11 +6,36 @@ from os import remove
 import os
 from modelo import Modelo
 import random
-import matplotlib
 import genetic
 import matplotlib.pyplot as plt
 
 
+def grafica_elite():
+    # Grafica los fitness recogidos en la ejecución
+    #   (rojo - mejor Driver)
+    #   (azul - media de los 2 siguientes mejores)
+    #   (verde - media de fitness de toda la población)
+    datos = open("fitness/fitness_graph.txt", 'r').read()
+    lineas = datos.split('\n')
+    xs = []
+    ys = []
+    bs = []
+    b2s = []
+    for linea in lineas:
+        if len(linea) > 1:
+            x, y, b, b2 = linea.split(',')
+            xs.append(int(x))
+            ys.append(float(y))
+            bs.append(float(b))
+            b2s.append(float(b2))
+
+    plt.plot(xs, b2s, '-b')
+    plt.plot(xs, bs, '-r')
+    plt.plot(xs, ys, '-g')
+    plt.show()
+
+
+# __Inicio de programa__
 if __name__ == '__main__':
 
     # Entrena o Infiere
@@ -18,11 +43,11 @@ if __name__ == '__main__':
 
     # Drivers por cada tipo de selección (población)
     elite = 5
-    nuevos = 10
+    nuevos = 8
     n_padres = 15
 
     if train:
-        # Aplica el Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
+        # Aplica Algoritmos Genéticos para conseguir un conductor capaz de recorrer el circuito
         generaciones = 301  # Generaciones +1
 
         # Población de cada generación
@@ -43,9 +68,10 @@ if __name__ == '__main__':
                     repite = False
                     print(f'Driver {i+1}:')
                     main(MyDriver(logdata=False, generation=g, n=i, max_gear=1))
-                    '''----------------------------------------------------------------------------------------'''
+                    # Comentar o descomentar sección para que cada Driver haga otro intento
+                    #   para asegurarse de que los resultados son más confiables
+                    '''----------------------------------------------------------------------------------------
                     if g > 1:
-                        # Cada Driver hace otro intento para asegurar que los resultados sean confiables
                         main(MyDriver(logdata=False, generation=g, n=i, max_gear=3))
                         # Calcula media del fitness del Driver
                         fitness = np.load("fitness/fitness.npy", allow_pickle=True)
@@ -63,7 +89,7 @@ if __name__ == '__main__':
                                     pesos = np.concatenate((pesos, pesos_init[idx]), axis=None)
                             np.save(f"weights/pesos{i}.npy", pesos)
                         np.save(f"fitness/fitness.npy", fitness)
-                    '''----------------------------------------------------------------------------------------- '''
+                    ----------------------------------------------------------------------------------------- '''
                 print('-------------------------------')
 
             # Carga fitness
@@ -120,9 +146,14 @@ if __name__ == '__main__':
             emparejamientos1 = np.random.permutation(np.arange(len(padres)))
             emparejamientos2 = np.random.permutation(np.arange(len(padres)))
             emparejamientos3 = np.random.permutation(np.arange(len(padres)))
-            # (n_padres x 4 hijos)
+
+            # Cada emparejamiento crearán: el número de padres x2, hijos.
+            #   Hay que tenerlo en cuenta al definir tanto la población,
+            #    como el último parámetro de las funciones de emparejamiento.
             n_hijos = len(emparejamientos1)
-            #genetic.crossover_simple(emparejamientos1, padres, elite + nuevos)
+
+            # Funciones de emparejamiento
+            # genetic.crossover_simple(emparejamientos1, padres, elite + nuevos)
             genetic.crossover_multipunto(emparejamientos2, padres, elite + nuevos)
             genetic.crossover_genes(emparejamientos3, padres, elite + nuevos + n_hijos*2)
 
@@ -136,25 +167,8 @@ if __name__ == '__main__':
             graph_file.write(f'{g},{"{:.2f}".format(np.average(fitness))},{"{:.2f}".format(fitness[index_orden[0]])},{"{:.2f}".format((fitness[index_orden[1]]+fitness[index_orden[2]])/2)}\n')
 
     else:
-        # Grafica los datos recogidos (rojo mejor Driver) (verde media de fitness)
-        datos = open("fitness/fitness_graph.txt", 'r').read()
-        lineas = datos.split('\n')
-        xs = []
-        ys = []
-        bs = []
-        b2s = []
-        for linea in lineas:
-            if len(linea) > 1:
-                x, y, b, b2 = linea.split(',')
-                xs.append(int(x))
-                ys.append(float(y))
-                bs.append(float(b))
-                b2s.append(float(b2))
-
-        plt.plot(xs, b2s, '-b')
-        plt.plot(xs, bs, '-r')
-        plt.plot(xs, ys, '-g')
-        plt.show()
+        # Grafica fitness de la elite y la media de la población
+        grafica_elite()
 
         # Probar con los Drivers que haya conseguido más fitness en el entrenamiento
         for i in range(0, elite):
@@ -162,4 +176,3 @@ if __name__ == '__main__':
             main(MyDriver(logdata=False, generation=-1, n=i, max_gear=1))
 
             print('-------------------------------')
-
